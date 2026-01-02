@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="me.breakgim.runa" path="/me/breakgim/runa/">
+    <key name="close-after-launch" type="b">
+      <default>false</default>
+      <summary>Close launcher after launching game</summary>
+      <description>Automatically close the launcher when a game client is started</description>
+    </key>
+    <key name="java-path" type="s">
+      <default>"java"</default>
+      <summary>Java binary path</summary>
+      <description>Path to the Java executable used to launch game clients</description>
+    </key>
+  </schema>
+</schemalist>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Runa
+Comment=Game launcher
+Exec=runa
+Icon=me.breakgim.runa
+Terminal=false
+Categories=Game;

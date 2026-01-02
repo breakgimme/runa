@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>me.breakgim.runa</id>
+
+  <name>Runa</name>
+  <summary>A desktop launcher for a certain old-school MMORPG</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-3-Clause</project_license>
+
+  <developer id="me.breakgim">
+    <name>breakgimme</name>
+  </developer>
+
+  <url type="homepage">https://github.com/breakgimme/runa</url>
+
+  <description>
+    <p>
+      Runa is a desktop launcher designed to manage accounts and start compatible Java-based game clients for a certain old-school MMORPG, built with GTK4 and libadwaita for seamless integration with modern GNOME desktops.
+    </p>
+  </description>
+
+  <content_rating type="oars-1.0">
+    <content_attribute id="violence-cartoon">moderate</content_attribute>
+    <content_attribute id="violence-fantasy">moderate</content_attribute>
+    <content_attribute id="violence-bloodshed">mild</content_attribute>
+    <content_attribute id="drugs-alcohol">moderate</content_attribute>
+    <content_attribute id="drugs-narcotics">mild</content_attribute>
+    <content_attribute id="drugs-tobacco">mild</content_attribute>
+    <content_attribute id="sex-themes">mild</content_attribute>
+    <content_attribute id="language-profanity">mild</content_attribute>
+    <content_attribute id="language-humor">mild</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="money-purchasing">intense</content_attribute>
+    <content_attribute id="money-gambling">moderate</content_attribute>
+  </content_rating>
+
+  <releases>
+    <release version="0.1.0" date="2026-01-02"></release>
+  </releases>
+
+  <launchable type="desktop-id">me.breakgim.runa.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://r2.piwo.rocks/runa/runa1.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://r2.piwo.rocks/runa/runa2.png</image>
+    </screenshot>
+  </screenshots>
+</component>
