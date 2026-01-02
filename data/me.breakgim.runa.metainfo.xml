@@ -36,7 +36,7 @@
   </content_rating>
 
   <releases>
-    <release version="0.1.0" date="2026-01-02"></release>
+    <release version="0.1.1" date="2026-01-02"></release>
   </releases>
 
   <launchable type="desktop-id">me.breakgim.runa.desktop</launchable>
@@ -44,9 +44,11 @@
   <screenshots>
     <screenshot type="default">
       <image>https://r2.piwo.rocks/runa/runa1.png</image>
+      <caption>Main screen</caption>
     </screenshot>
     <screenshot>
       <image>https://r2.piwo.rocks/runa/runa2.png</image>
+      <caption>Login screen</caption>
     </screenshot>
   </screenshots>
 </component>
