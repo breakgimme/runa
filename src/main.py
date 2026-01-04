@@ -241,6 +241,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.sign_out_action.set_enabled(False)
         self.add_action(self.sign_out_action)
         menu.append("Sign out", "win.sign-out")
+
+        about_action = Gio.SimpleAction.new("about", None)
+        about_action.connect("activate", self.on_about_clicked)
+        self.add_action(about_action)
+        menu.append("About", "win.about")
         
         menu_button.set_menu_model(menu)
         self.header_bar.pack_end(menu_button)
@@ -666,6 +671,15 @@ class MainWindow(Adw.ApplicationWindow):
     
     def on_settings_clicked(self, action, param):
         self.show_settings_page()
+
+    def on_about_clicked(self, action, param):
+        dialog = Adw.AboutDialog()
+        dialog.set_application_name("Runa")
+        dialog.set_application_icon("me.breakgim.runa")
+        dialog.set_developer_name("breakgimme")
+        dialog.set_version(self.get_application().version)
+        dialog.set_website("https://github.com/breakgimme/runa")
+        dialog.present(self)
     
     def show_settings_page(self):
         old_view = self.stack.get_child_by_name("settings")
@@ -738,8 +752,9 @@ class MainWindow(Adw.ApplicationWindow):
 
 
 class MyApp(Adw.Application):
-    def __init__(self, **kwargs):
+    def __init__(self, version=None, **kwargs):
         super().__init__(**kwargs)
+        self.version = version
         self.connect('activate', self.on_activate)
     
     def on_activate(self, app):
@@ -747,10 +762,6 @@ class MyApp(Adw.Application):
         win.present()
 
 
-def main():
-    app = MyApp(application_id='me.breakgim.runa')
+def main(version=None):
+    app = MyApp(application_id='me.breakgim.runa', version=version)
     return app.run(sys.argv)
-
-
-if __name__ == '__main__':
-    main()
