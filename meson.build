@@ -1,5 +1,5 @@
 project('runa',
-  version: '0.1.0',
+  version: '0.1.2',
   meson_version: '>= 0.59.0',
 )
 

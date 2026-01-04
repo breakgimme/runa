@@ -98,7 +98,7 @@ class SessionManager:
             data,
             None
         )
-    
+
     @staticmethod
     def load_session() -> dict:
         password = Secret.password_lookup_sync(
@@ -509,9 +509,13 @@ class MainWindow(Adw.ApplicationWindow):
             client_string_list.append(client_name)
         
         self.client_dropdown = Gtk.DropDown(model=client_string_list)
-        self.client_dropdown.set_selected(0)
         self.client_dropdown.set_hexpand(True)
-        self.client_dropdown.connect("notify::selected", self.on_client_changed)
+
+        last_client = self._settings.get_string("last-client")
+        if last_client in self._client_names:
+            self.client_dropdown.set_selected(self._client_names.index(last_client))
+        else:
+            self.client_dropdown.set_selected(0)
         client_row.append(self.client_dropdown)
         
         self.delete_btn = Gtk.Button(icon_name="user-trash-symbolic")
@@ -519,6 +523,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.delete_btn.set_tooltip_text("Delete client")
         self.delete_btn.connect("clicked", self.on_delete_client_clicked)
         client_row.append(self.delete_btn)
+
+        self.client_dropdown.connect("notify::selected", self.on_client_changed)
         
         client_box.append(client_row)
         char_box.append(client_box)
@@ -548,7 +554,10 @@ class MainWindow(Adw.ApplicationWindow):
     def on_client_changed(self, dropdown, param):
         selected_idx = dropdown.get_selected()
         if 0 <= selected_idx < len(self._client_names):
-            self._update_delete_button(self._client_names[selected_idx])
+            client_name = self._client_names[selected_idx]
+            if hasattr(self, "delete_btn"):
+                self._update_delete_button(client_name)
+            self._settings.set_string("last-client", client_name)
         return False
 
     def _update_delete_button(self, client_name):

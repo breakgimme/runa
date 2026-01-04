@@ -36,7 +36,7 @@
   </content_rating>
 
   <releases>
-    <release version="0.1.1" date="2026-01-02"></release>
+    <release version="0.1.2" date="2026-01-04"></release>
   </releases>
 
   <launchable type="desktop-id">me.breakgim.runa.desktop</launchable>
