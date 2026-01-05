@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 import sys
 import gi
-import uuid
-import hashlib
-import base64
-import secrets
-import json
 import threading
 import os
 import subprocess
 import time
 import traceback
 from pathlib import Path
-from urllib.parse import urlencode, urljoin, urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -20,14 +15,18 @@ from urllib.error import HTTPError, URLError
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('WebKit', '6.0')
-gi.require_version('Secret', '1')
 
-from gi.repository import Gtk, Adw, WebKit, GLib, Secret, Gio
+from gi.repository import Gtk, Adw, WebKit, GLib, Gio
 
-
-ORIGIN = "https://account.jagex.com"
-REDIRECT = "https://secure.runescape.com/m=weblogin/launcher-redirect"
-CLIENT_ID = "com_jagex_auth_desktop_launcher"
+from .auth import (
+    build_auth_url,
+    build_consent_url,
+    exchange_token,
+    create_session,
+    fetch_accounts,
+    SessionManager,
+    REDIRECT,
+)
 
 GAME_CLIENTS = {
     "RuneLite": {
@@ -40,83 +39,11 @@ GAME_CLIENTS = {
     }
 }
 
-SECRET_SCHEMA = Secret.Schema.new(
-    "me.breakgim.runa",
-    Secret.SchemaFlags.NONE,
-    {
-        "session_name": Secret.SchemaAttributeType.STRING,
-    }
-)
-
 
 def get_clients_dir():
     data_dir = Path.home() / ".local" / "share" / "runa" / "clients"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
-
-
-def _pkce_verifier(length: int = 43) -> str:
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~"
-    return "".join(secrets.choice(alphabet) for _ in range(length))
-
-
-def _pkce_challenge(verifier: str) -> str:
-    digest = hashlib.sha256(verifier.encode("utf-8")).digest()
-    return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
-
-
-def build_auth_url() -> tuple[str, dict]:
-    state = str(uuid.uuid4())
-    verifier = _pkce_verifier(43)
-    challenge = _pkce_challenge(verifier)
-
-    auth_path = "/oauth2/auth"
-    base = urljoin(ORIGIN, auth_path)
-    query = urlencode([
-        ("flow", "launcher"),
-        ("response_type", "code"),
-        ("client_id", CLIENT_ID),
-        ("redirect_uri", REDIRECT),
-        ("code_challenge", challenge),
-        ("code_challenge_method", "S256"),
-        ("prompt", "login"),
-        ("scope", "openid offline gamesso.token.create user.profile.read"),
-        ("state", state),
-    ])
-    return f"{base}?{query}", {"state": state, "verifier": verifier}
-
-
-class SessionManager:
-    @staticmethod
-    def store_session(session_id: str):
-        data = json.dumps({"session_id": session_id})
-        Secret.password_store_sync(
-            SECRET_SCHEMA,
-            {"session_name": "default"},
-            Secret.COLLECTION_DEFAULT,
-            "Runa Session",
-            data,
-            None
-        )
-
-    @staticmethod
-    def load_session() -> dict:
-        password = Secret.password_lookup_sync(
-            SECRET_SCHEMA,
-            {"session_name": "default"},
-            None
-        )
-        if password:
-            return json.loads(password)
-        return None
-    
-    @staticmethod
-    def clear_session():
-        Secret.password_clear_sync(
-            SECRET_SCHEMA,
-            {"session_name": "default"},
-            None
-        )
 
 
 class ClientManager:
@@ -326,7 +253,7 @@ class MainWindow(Adw.ApplicationWindow):
     
     def validate_and_load_session(self):
         try:
-            accounts = self.fetch_accounts_sync()
+            accounts = fetch_accounts(self._session_id)
             if accounts:
                 self._accounts = accounts
                 GLib.idle_add(self.show_character_selection)
@@ -366,7 +293,7 @@ class MainWindow(Adw.ApplicationWindow):
                     decision.ignore()
                     return True
                 
-                threading.Thread(target=self.exchange_token, args=(code,), daemon=True).start()
+                threading.Thread(target=self.exchange_token_handler, args=(code,), daemon=True).start()
                 decision.ignore()
                 return True
         
@@ -383,85 +310,35 @@ class MainWindow(Adw.ApplicationWindow):
                         decision.ignore()
                         return True
                     
-                    threading.Thread(target=self.create_session, args=(id_token,), daemon=True).start()
+                    threading.Thread(target=self.create_session_handler, args=(id_token,), daemon=True).start()
                     decision.ignore()
                     return True
         
         return False
     
-    def exchange_token(self, code):
-        url = "https://account.jagex.com/oauth2/token"
-        data = urlencode({
-            "grant_type": "authorization_code",
-            "client_id": CLIENT_ID,
-            "code": code,
-            "code_verifier": self._pkce['verifier'],
-            "redirect_uri": REDIRECT,
-        }).encode('utf-8')
-        
+    def exchange_token_handler(self, code):
         try:
-            request = Request(url, data=data, method='POST')
-            with urlopen(request) as response:
-                tokens = json.loads(response.read().decode('utf-8'))
-                self._id_token = tokens['id_token']
-                
-                consent_url, consent_state = self.build_consent_url(self._id_token)
-                self._consent_state = consent_state
-                
-                GLib.idle_add(lambda: self.webview.load_uri(consent_url))
-        except Exception as e:
-            traceback.print_exc()
-    
-    def build_consent_url(self, id_token):
-        state = str(uuid.uuid4())
-        nonce = str(uuid.uuid4())
-        
-        consent_path = "/oauth2/auth"
-        base = urljoin(ORIGIN, consent_path)
-        query = urlencode([
-            ("id_token_hint", id_token),
-            ("nonce", nonce),
-            ("prompt", "consent"),
-            ("response_type", "id_token code"),
-            ("client_id", "1fddee4e-b100-4f4e-b2b0-097f9088f9d2"),
-            ("redirect_uri", "http://localhost"),
-            ("scope", "openid offline"),
-            ("state", state),
-        ])
-        return f"{base}?{query}", state
-    
-    def create_session(self, id_token):
-        url = "https://auth.jagex.com/game-session/v1/sessions"
-        body = json.dumps({"idToken": id_token}).encode('utf-8')
-        
-        try:
-            request = Request(url, data=body, method='POST')
-            request.add_header('Content-Type', 'application/json')
-            request.add_header('Accept', 'application/json')
+            self._id_token = exchange_token(code, self._pkce['verifier'])
             
-            with urlopen(request) as response:
-                result = json.loads(response.read().decode('utf-8'))
-                self._session_id = result.get('sessionId')
-                
-                SessionManager.store_session(self._session_id)
-                threading.Thread(target=self.fetch_accounts, daemon=True).start()
+            consent_url, consent_state = build_consent_url(self._id_token)
+            self._consent_state = consent_state
+            
+            GLib.idle_add(lambda: self.webview.load_uri(consent_url))
         except Exception as e:
             traceback.print_exc()
     
-    def fetch_accounts_sync(self):
-        url = "https://auth.jagex.com/game-session/v1/accounts"
-        
-        request = Request(url, method='GET')
-        request.add_header('Content-Type', 'application/json')
-        request.add_header('Accept', 'application/json')
-        request.add_header('Authorization', f'Bearer {self._session_id}')
-        
-        with urlopen(request) as response:
-            return json.loads(response.read().decode('utf-8'))
-    
-    def fetch_accounts(self):
+    def create_session_handler(self, id_token):
         try:
-            self._accounts = self.fetch_accounts_sync()
+            self._session_id = create_session(id_token)
+            
+            SessionManager.store_session(self._session_id)
+            threading.Thread(target=self.fetch_accounts_handler, daemon=True).start()
+        except Exception as e:
+            traceback.print_exc()
+    
+    def fetch_accounts_handler(self):
+        try:
+            self._accounts = fetch_accounts(self._session_id)
             GLib.idle_add(self.show_character_selection)
         except Exception as e:
             traceback.print_exc()
