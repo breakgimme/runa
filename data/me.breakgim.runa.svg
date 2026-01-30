@@ -9,7 +9,7 @@
    id="svg1"
    xml:space="preserve"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
-   sodipodi:docname="runa.svg"
+   sodipodi:docname="runaxd.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,14 +25,14 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="4.4453125"
-     inkscape:cx="38.692443"
-     inkscape:cy="61.637962"
-     inkscape:window-width="2313"
-     inkscape:window-height="885"
+     inkscape:cx="41.72935"
+     inkscape:cy="35.43058"
+     inkscape:window-width="1752"
+     inkscape:window-height="1190"
      inkscape:window-x="26"
      inkscape:window-y="23"
      inkscape:window-maximized="0"
-     inkscape:current-layer="g25"><inkscape:grid
+     inkscape:current-layer="layer1"><inkscape:grid
        id="grid1"
        units="px"
        originx="0"
@@ -100,7 +100,7 @@
      id="layer1"><g
        id="g22"
        inkscape:label="shadow"
-       transform="translate(0,0.35483767)"><path
+       transform="matrix(1.0441878,0,0,1.0441878,-0.74824672,-0.3855693)"><path
          id="rect3"
          style="fill:#9a9996;fill-opacity:1;stroke-width:0.253267"
          transform="matrix(0.64221217,0.68017451,-0.6807953,0.64155903,1.0924594,1.0934479)"
@@ -108,7 +108,8 @@
          inkscape:path-effect="#path-effect4"
          inkscape:original-d="M 11.773224,-12.481854 H 36.10047 V 11.105994 H 11.773224 Z" /></g><g
        id="g25"
-       inkscape:label="icon"><path
+       inkscape:label="icon"
+       transform="matrix(1.0441878,0,0,1.0441878,-0.74824672,-0.75608647)"><path
          id="path22"
          style="fill:#c0bfbc;fill-opacity:1;stroke-width:0.253267"
          transform="matrix(0.64221217,0.68017451,-0.6807953,0.64155903,1.0924594,1.0934479)"

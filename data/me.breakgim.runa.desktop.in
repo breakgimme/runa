@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Runa
-Comment=Game launcher
+Comment=Launcher for an old-school MMORPG
 Exec=runa
 Icon=me.breakgim.runa
 Terminal=false
