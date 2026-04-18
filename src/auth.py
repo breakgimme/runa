@@ -87,6 +87,7 @@ def exchange_token(code: str, verifier: str) -> str:
     }).encode('utf-8')
     
     request = Request(url, data=data, method='POST')
+    request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36')
     with urlopen(request) as response:
         tokens = json.loads(response.read().decode('utf-8'))
         return tokens['id_token']
@@ -97,6 +98,7 @@ def create_session(id_token: str) -> str:
     body = json.dumps({"idToken": id_token}).encode('utf-8')
     
     request = Request(url, data=body, method='POST')
+    request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36')
     request.add_header('Content-Type', 'application/json')
     request.add_header('Accept', 'application/json')
     
@@ -109,6 +111,7 @@ def fetch_accounts(session_id: str) -> list:
     url = "https://auth.jagex.com/game-session/v1/accounts"
     
     request = Request(url, method='GET')
+    request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36')
     request.add_header('Content-Type', 'application/json')
     request.add_header('Accept', 'application/json')
     request.add_header('Authorization', f'Bearer {session_id}')
