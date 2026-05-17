@@ -15,6 +15,10 @@ configure_file(
 python3.install_sources(
   '__init__.py',
   'main.py',
-  'auth.py',
   subdir: 'runa',
+)
+
+install_data(
+  'main.ui',
+  install_dir: python3.get_install_dir() / 'runa',
 )
